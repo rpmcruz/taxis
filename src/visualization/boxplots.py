@@ -2,16 +2,13 @@ import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.svm import SVR
 
 print('loading data...')
 usecols = ['starting_latitude', 'starting_longitude', 'starting_timestamp',
            'revenue_class']
 df = pd.read_csv('../../data/data_train_competition.csv', usecols=usecols)
 df.columns = ['lat', 'lon', 'time', 'y']
+
 
 def discretize_two_features(v1, v2, nbins):
     # this will return #bins=nbins**2
@@ -25,7 +22,7 @@ print('creating features...')
 time = [datetime.fromtimestamp(t) for t in df['time']]
 df['weekday'] = [t.weekday() for t in time]
 df['month'] = [t.month for t in time]
-df['hour']  = [t.hour for t in time]
+df['hour'] = [t.hour for t in time]
 df['pos'] = discretize_two_features(df['lat'], df['lon'], 8)
 
 print('displaying...')
@@ -37,4 +34,3 @@ for feature in ['weekday', 'month', 'pos']:
         ax.set_yticks(np.arange(1, 6))
     plt.suptitle(feature)
     plt.show()
-
