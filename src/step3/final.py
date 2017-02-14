@@ -3,6 +3,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import cohen_kappa_score
+from xgboost import XGBClassifier
 import numpy as np
 
 
@@ -20,9 +21,13 @@ def run(tr, ts):
 
     models = [
         (GaussianNB(), {'priors': [None]}),
-        (RandomForestClassifier(1000), {
-            'class_weight': [None, 'balanced'],
-            'min_samples_leaf': 10**np.asarray([0, 1, 2, 3, 4]),
+        (RandomForestClassifier(100), {
+            'class_weight': ['balanced'],
+            'max_depth': np.linspace(4, 20, 5, dtype=int),
+        }),
+        (XGBClassifier(), {
+            'max_depth': np.linspace(4, 20, 5, dtype=int),
+            'learning_rate': [0.1, 0.5],
         }),
     ]
 
