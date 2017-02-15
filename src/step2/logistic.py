@@ -21,7 +21,7 @@ def run(tr, ts):
         {'class_weight': ['balanced'], 'C': 10.**np.arange(-2, 7)},
         scoring, n_jobs=-1, return_train_score=False)
     clf.fit(Xtr, ytr)
-    print('logistic', pd.DataFrame(clf.cv_results_))
+    print(pd.DataFrame(clf.cv_results_))
 
     yptr = clf.predict(Xtr)
     ypts = clf.predict(Xts)

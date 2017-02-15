@@ -15,33 +15,48 @@ def run(tr, ts):
     cols_except = ['y', 'time']
     usecols = [c for c in ts.columns if c not in cols_except]
 
-    Xtr = tr.as_matrix(usecols)
-    ytr = tr.as_matrix(['y'])[:, 0].astype(int)
-    Xts = ts.as_matrix(usecols)
+    for usecols in [
+        #[c for c in ts.columns if c.startswith('cluster-')],
+        #[c for c in ts.columns if c.startswith('cluster-dist-')],
+        #[c for c in ts.columns if c.startswith('grid-')],
+        #['kde'],
+        #['hour', 'month', 'weekday'],
+        #['ly'],
+        #['lat', 'lon'],
+        ['time'],
+    ]:
+        print()
+        print()
+        print('Features:')
+        print(usecols)
+        Xtr = tr.as_matrix(usecols)
+        ytr = tr.as_matrix(['y'])[:, 0].astype(int)
+        Xts = ts.as_matrix(usecols)
 
-    models = [
-        (GaussianNB(), {'priors': [None]}),
-        (RandomForestClassifier(100), {
-            'class_weight': ['balanced'],
-            'max_depth': np.linspace(4, 20, 5, dtype=int),
-        }),
-        (XGBClassifier(), {
-            'max_depth': np.linspace(4, 20, 5, dtype=int),
-            'learning_rate': [0.1, 0.5],
-        }),
-    ]
+        models = [
+            (GaussianNB(), {'priors': [None]}),
+            (RandomForestClassifier(100, n_jobs=-1), {
+                'class_weight': ['balanced'],
+                'max_depth': [None],#np.linspace(6, 18, 5, dtype=int),
+            }),
+            #(XGBClassifier(), {
+            #    'max_depth': np.linspace(4, 20, 5, dtype=int),
+            #    'learning_rate': [0.1, 0.5],
+            #}),
+        ]
 
-    best_score = np.inf
+        best_score = np.inf
 
-    for clf, params in models:
-        name = type(clf).__name__
-        clf = GridSearchCV(
-            clf, params, scoring, n_jobs=2, return_train_score=False)
-        clf.fit(Xtr, ytr)
-        print(name, pd.DataFrame(clf.cv_results_))
-        if clf.best_score_ < best_score:
-            best_score = clf.best_score_
-            best_clf = clf
+        for clf, params in models:
+            name = type(clf).__name__
+            clf = GridSearchCV(
+                clf, params, scoring, n_jobs=1, verbose=2, refit=False, return_train_score=False)
+            clf.fit(Xtr, ytr)
+            print(name)
+            print(pd.DataFrame(clf.cv_results_))
+            if clf.best_score_ < best_score:
+                best_score = clf.best_score_
+                best_clf = clf
 
     yp = best_clf.predict(Xts)
     return pd.DataFrame(), pd.DataFrame({'y': yp})
