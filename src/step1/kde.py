@@ -19,7 +19,7 @@ def run(tr, ts):
     Xts = ts.as_matrix(['lat', 'lon'])
 
     # undersampling to make these faster
-    X = Xtr[np.random.choice(Xtr.shape[0], 10000, False)]
+    X = Xtr[np.random.choice(Xtr.shape[0], 1000, False)]
 
     bandwidth = scott_rule(X)
     m = KernelDensity(bandwidth).fit(X)

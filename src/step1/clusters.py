@@ -20,9 +20,10 @@ def run(tr, ts):
     tr_inliers = dtr < 0.02
     ts_inliers = dts < 0.02
 
-    k = 10
-    m = KMeans(k)
-    _Ctr = m.fit_predict(Xtr[tr_inliers], 0)
+    print('clustering all points...')
+    k_all = 10
+    m = KMeans(k_all)
+    _Ctr = m.fit_predict(Xtr[tr_inliers])
     _Cts = m.predict(Xts[ts_inliers])
 
     # outliers = cluster 0
@@ -38,11 +39,31 @@ def run(tr, ts):
     Dts = m.transform(Xts)
 
     # one hot encoding
-    Ctr = np.asarray([[int(c == i) for c in Ctr] for i in range(k+1)]).T
-    Cts = np.asarray([[int(c == i) for c in Cts] for i in range(k+1)]).T
+    Ctr = np.asarray([[int(c == i) for c in Ctr] for i in range(k_all+1)]).T
+    Cts = np.asarray([[int(c == i) for c in Cts] for i in range(k_all+1)]).T
 
     Xtr_ = np.c_[Ctr, Dtr]
     Xts_ = np.c_[Cts, Dts]
-    names = ['cluster-%d' % i for i in range(k+1)] + \
-        ['cluster-dist-%d' % i for i in range(k)]
+
+    print('clustering across revenue classes...')
+    k_across = 3
+    y = tr.as_matrix(['y'])[:, 0]
+    Dtrs = []
+    Dtss = []
+    for klass in range(1, 6):
+        Xtr[y == klass]
+        m = KMeans(k_across)
+        m.fit(Xtr[np.logical_and(tr_inliers, y == klass)])
+        Dtrs.append(np.amin(m.transform(Xtr), 1))
+        Dtss.append(np.amin(m.transform(Xts), 1))
+
+    Dtrs = np.asarray(Dtrs).T
+    Dtss = np.asarray(Dtss).T
+
+    Xtr_ = np.c_[Xtr_, Dtrs]
+    Xts_ = np.c_[Xts_, Dtss]
+
+    names = ['cluster-%d' % i for i in range(k_all+1)] + \
+        ['cluster-dist-%d' % i for i in range(k_all)] + \
+        ['cluster-class-dist-%d' % i for i in range(1, 6)]
     return pd.DataFrame(Xtr_, columns=names), pd.DataFrame(Xts_, columns=names)

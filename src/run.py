@@ -5,15 +5,14 @@ from datetime import datetime
 import os
 
 print('# step 0')
-usecols = [
-    'starting_latitude', 'starting_longitude', 'starting_timestamp',
-    'revenue_class']
+usecols = ['taxi_id', 'starting_latitude', 'starting_longitude',
+    'starting_timestamp', 'revenue_class']
 tr = pd.read_csv('../data/data_train_competition.csv', usecols=usecols)
-tr.columns = ['lat', 'lon', 'time', 'y']
+tr.columns = ['id', 'lat', 'lon', 'time', 'y']
 
 usecols = usecols[:-1]
 ts = pd.read_csv('../data/data_test_N_competition.csv', usecols=usecols)
-ts.columns = ['lat', 'lon', 'time']
+ts.columns = ['id', 'lat', 'lon', 'time']
 
 
 steps = []
@@ -28,6 +27,7 @@ for step in range(1, 99):
 dependency_obsolete = False
 
 for stepi, substeps in enumerate(steps):
+    print('features: %s' % str(ts.columns.tolist()))
     outdated = False
     substep_tr = []
     substep_ts = []

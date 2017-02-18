@@ -12,7 +12,7 @@ def scoring(m, X, y):
 
 
 def run(tr, ts):
-    cols_except = ['y', 'time']
+    cols_except = ['y', 'time', 'id']
     usecols = [c for c in ts.columns if c not in cols_except]
 
     for usecols in [
