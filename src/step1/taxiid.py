@@ -1,35 +1,30 @@
 import pandas as pd
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.metrics import cohen_kappa_score
 import numpy as np
 
-
-def scoring(m, X, y):
-    return cohen_kappa_score(y, m.predict(X), list(range(1, 6)), 'quadratic')
-
-
+#
 def run(tr, ts):
-    usecols = ['id']
+    Xtr = tr.as_matrix(['id', 'y'])
+    Xts = ts.as_matrix(['id'])
 
-    Xtr = tr.as_matrix(usecols)
-    ytr = tr.as_matrix(['y'])[:, 0].astype(int)
-    Xts = ts.as_matrix(usecols)
+    ids = np.unique(Xtr[:, 0])
+    yy = np.zeros((len(ids), 5))
+    for i, id in enumerate(ids):
+        ii = Xtr[Xtr[:, 0] == id][:, 1].astype(int)
+        yy[i] = np.bincount(ii, minlength=6)[1:] / len(ii)
 
-    enc = OneHotEncoder(handle_unknown='ignore')
-    Xtr = enc.fit_transform(Xtr)
-    Xts = enc.transform(Xts)
+    NA = np.bincount(Xtr[:, 1].astype(int))[1:] / len(Xtr)
 
-    clf = GridSearchCV(
-        RandomForestClassifier(100), {
-            'class_weight': ['balanced'],
-            'max_depth': (10.**np.arange(1, 4).astype(int)),
-        },
-        scoring, n_jobs=-1, return_train_score=False)
-    clf.fit(Xtr, ytr)
-    print(pd.DataFrame(clf.cv_results_))
+    ytr = np.zeros((len(Xtr), 5))
+    yts = np.zeros((len(Xts), 5))
+    for i, (id, _) in enumerate(Xtr):
+        if id not in ids:
+            ytr[i] = NA
+        else:
+            ytr[i] = yy[id == ids]
+    for i, id in enumerate(Xts):
+        if id not in ids:
+            yts[i] = NA
+        else:
+            yts[i] = yy[id == ids]
 
-    yptr = clf.predict(Xtr)
-    ypts = clf.predict(Xts)
-    return pd.DataFrame({'idy': yptr}), pd.DataFrame({'idy': ypts})
+    return pd.DataFrame({'hid%d' % (i+1): ytr[:, i] for i in range(5)}), pd.DataFrame({'hid%d' % (i+1): yts[:, i] for i in range(5)})
