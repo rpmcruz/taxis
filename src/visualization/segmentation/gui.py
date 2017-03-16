@@ -50,10 +50,6 @@ def city_image(latloc, lonloc, mapsize):
 
 print('build city matrix...')
 
-mapsize = 0.125
-latloc = 40.53
-lonloc = 22.95
-
 if os.path.exists('roads.json'):
     with open('roads.json', 'r') as f:
         roads = json.load(f)
@@ -61,6 +57,13 @@ if os.path.exists('roads.json'):
             roads.append([])
 else:
     roads = [[]]
+
+
+def reset():
+    global mapsize, latloc, lonloc
+    mapsize = 0.125
+    latloc = 40.53
+    lonloc = 22.95
 
 
 def redraw():
@@ -97,6 +100,7 @@ def mouse_cb(event, x, y, value, data):
 print('show')
 cv2.namedWindow('win')
 cv2.setMouseCallback('win', mouse_cb)
+reset()
 
 while True:
     redraw()
@@ -115,10 +119,8 @@ while True:
         lonloc = lonloc + move
     elif key == 10:  # return
         roads.append([])
-    elif key == ord('c'):
-        mapsize = 4
-        latloc = min_lat
-        lonloc = min_lon
+    elif key == ord('r'):  # reset
+        reset()
     elif key == ord('+'):
         zoom(1)
     elif key == ord('-'):
