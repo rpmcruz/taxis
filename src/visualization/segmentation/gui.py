@@ -7,11 +7,14 @@ import cv2
 import json
 import os
 
+road_filename = '../../../data/roads.json'
+
 print('load data...')
 usecols = ['starting_latitude', 'starting_longitude']
 df = pd.read_csv(
     '../../../data/data_train_competition.csv', usecols=usecols)
 df.columns = ['lat', 'lon']
+df = df.sample(frac=0.1)
 
 # create image
 X = df.as_matrix()
@@ -50,8 +53,8 @@ def city_image(latloc, lonloc, mapsize):
 
 print('build city matrix...')
 
-if os.path.exists('roads.json'):
-    with open('roads.json', 'r') as f:
+if os.path.exists(road_filename):
+    with open(road_filename, 'r') as f:
         roads = json.load(f)
         if len(roads[-1]):
             roads.append([])
@@ -83,8 +86,6 @@ def zoom(value):
     global mapsize, latloc, lonloc
     if value > 0:
         mapsize = mapsize/2
-        latloc += mapsize
-        lonloc += mapsize
     else:
         mapsize = mapsize*2
     redraw()
@@ -121,6 +122,10 @@ while True:
         roads.append([])
     elif key == ord('r'):  # reset
         reset()
+    elif key == ord('d'):  # delete
+        if len(roads[-1]):
+            roads[-1].pop()
+            redraw()
     elif key == ord('+'):
         zoom(1)
     elif key == ord('-'):
@@ -130,5 +135,8 @@ while True:
 
 cv2.destroyWindow('win')
 
-with open('roads.json', 'w') as f:
+# clean any invalid road
+roads = [road for road in roads if len(road) > 1]
+
+with open(road_filename, 'w') as f:
     json.dump(roads, f)
