@@ -18,6 +18,8 @@ df2 = pd.read_csv(
 df2.columns = ['lat', 'lon']
 
 df = pd.concat((df1, df2))
+df = df.sample(frac=0.1)
+print('data len: %d' % len(df))
 
 D = 0.001
 X = df.as_matrix()
@@ -81,7 +83,7 @@ def roads_distance(x):
 
 print('generating roads...')
 for it, i in enumerate(np.random.choice(len(X), len(X), False)):
-    sys.stdout.write('\r%4.2f%%' % (100*it/len(X)))
+    sys.stdout.write('\r%5.2f%% (%d)' % (100*it/len(X), len(roads)))
     sys.stdout.flush()
     dd = roads_distance(X[i])
     if len(dd) == 0 or dd.min() > D:
@@ -89,6 +91,7 @@ for it, i in enumerate(np.random.choice(len(X), len(X), False)):
         road = create_road(X[i])
         roads.append(road)
 sys.stdout.write('\r                     \r')
+print('roads len: %d' % len(roads))
 
 print('saving roads...')
 with open(road_filename, 'w') as f:
