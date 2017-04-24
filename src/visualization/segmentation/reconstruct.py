@@ -20,7 +20,7 @@ def dmax(array):
 print('load data...')
 usecols = ['starting_latitude', 'starting_longitude']
 df = pd.read_csv(
-    '../../data/data_tr_competition.csv', usecols=usecols)
+    '../../../data/data_train_competition.csv', usecols=usecols)
 df.columns = ['lat', 'lon']
 
 df = df.ix[np.logical_and(df['lat'] > 40.63, df['lat'] < 40.64)]
@@ -31,7 +31,7 @@ X = df.as_matrix()
 
 # hyperparameters
 D = 0.002
-NDIRS = 4
+NDIRS = 8
 NBINS = 10
 
 i = 100  # test
