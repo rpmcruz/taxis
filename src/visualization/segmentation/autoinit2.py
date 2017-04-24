@@ -84,7 +84,7 @@ def create_road(i0):
         if np.array_equal(oldii, ii) or i0 not in ii:
             x0 = X[ii, 0].min()
             x1 = X[ii, 0].max()
-            return (x0, m.predict([x0])[0]), ((x1, m.predict([x1])[0]))
+            return (x0, m.predict([[x0]])[0]), ((x1, m.predict([[x1]])[0]))
 
 print('generating roads...')
 for it, i in enumerate(np.random.choice(len(X), len(X), False)):
