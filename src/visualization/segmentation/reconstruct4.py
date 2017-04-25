@@ -3,6 +3,7 @@ import numpy as np
 from time import time
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+from time import time
 np.random.seed(0)
 
 print('load data...')

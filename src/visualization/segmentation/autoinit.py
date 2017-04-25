@@ -19,10 +19,15 @@ df2.columns = ['lat', 'lon']
 
 df = pd.concat((df1, df2))
 df = df.sample(frac=0.1)
+X = df.as_matrix()
+
+X = X[X[:, 0] > 40.53]
+X = X[X[:, 0] < 40.53+0.125]
+X = X[X[:, 1] > 22.95]
+X = X[X[:, 1] < 22.95+0.125]
 print('data len: %d' % len(df))
 
 D = 0.001
-X = df.as_matrix()
 
 
 def neighbors(x):
