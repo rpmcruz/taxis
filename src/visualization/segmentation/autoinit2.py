@@ -58,10 +58,11 @@ def roads_distance(x):
 
 
 def create_road(i0):
-    ii = [i0]
+    ii = np.asarray([i0])
     while True:
         # 1. neighbors of ii
         dd = np.ones(len(X))*np.inf
+        #_ii = ii[np.random.choice(len(ii), min(len(ii), 20000), False)]
         for i in ii:
             d = (X[:, 0] - X[i, 0])**2 + (X[:, 1] - X[i, 1])**2
             dd = np.minimum(dd, d)
