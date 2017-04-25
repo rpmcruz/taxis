@@ -59,29 +59,34 @@ def roads_distance(x):
 
 def create_road(i0):
     ii = [i0]
+    newii = ii
     while True:
         # 1. neighbors of ii
         dd = np.ones(len(X))*np.inf
-        for i in ii:
+        for i in newii:
             d = (X[:, 0] - X[i, 0])**2 + (X[:, 1] - X[i, 1])**2
             dd = np.minimum(dd, d)
+        dd[ii] = 0
 
         jj = np.where(dd < Dnn**2)[0]
 
         # 2 linear regression line
         _jj = jj[np.random.choice(len(jj), min(len(jj), 20000), False)]
-        m = LinearRegression().fit(X[_jj, 0:1], X[_jj, 1])
+        m = LinearRegression(fit_intercept=False)
+        m.fit(X[_jj, 0:1] - X[i0, 0], X[_jj, 1] - X[i0, 1])
 
         # 3. distance to linear regression
         # distance = |ax+by+c| / sqrt(a^2+b^2)
         a = -m.coef_[0]
         b = 1
-        c = -m.intercept_
-        dd = np.abs(a*X[jj, 0] + b*X[jj, 1] + c) / np.sqrt(a**2+b**2)
+        c = 0
+        dd = np.abs(a*(X[jj, 0]-X[i0, 0]) + b*(X[jj, 1]-X[i0, 1]) + c) / \
+            np.sqrt(a**2+b**2)
 
         oldii = ii
         ii = jj[dd < Droad]
-        if np.array_equal(oldii, ii) or i0 not in ii:
+        newii = np.array([i for i in ii if i not in oldii])
+        if len(newii) == 0:
             x0 = X[ii, 0].min()
             x1 = X[ii, 0].max()
             return (x0, m.predict([x0])[0]), ((x1, m.predict([x1])[0]))
