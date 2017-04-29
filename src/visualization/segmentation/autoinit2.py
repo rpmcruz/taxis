@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 import sys
 import json
 
-road_filename = 'testroads.json'
+road_filename = 'testroads3.json'
 roads = []
 
 print('load data...')
@@ -15,12 +15,13 @@ df.columns = ['lat', 'lon']
 
 # df = df.ix[np.logical_and(df['lat'] > 40.63, df['lat'] < 40.64)]
 # df = df.ix[np.logical_and(df['lon'] > 22.935, df['lon'] < 22.945)]
-# df = df.sample(100000)
+df = df.sample(100000)
 
 X = df.as_matrix()
 
 # hyperparameters
 Dnn = 0.0005
+Dclose = 0.0003
 Droad = 0.0002
 
 
@@ -60,6 +61,7 @@ def roads_distance(x):
 def create_road(i0):
     ii = [i0]
     newii = ii
+    it = 0
     while True:
         # 1. neighbors of ii
         dd = np.ones(len(X))*np.inf
@@ -84,22 +86,26 @@ def create_road(i0):
             np.sqrt(a**2+b**2)
 
         oldii = ii
-        ii = jj[dd < Droad]
+        ii = np.union1d(ii, jj[dd < Droad])
         newii = np.array([i for i in ii if i not in oldii])
         if len(newii) == 0:
+            if it <= 1:
+                return None
             x0 = X[ii, 0].min()
             x1 = X[ii, 0].max()
             return (x0, m.predict([[x0]])[0]), ((x1, m.predict([[x1]])[0]))
+        it += 1
 
 print('generating roads...')
 for it, i in enumerate(np.random.choice(len(X), len(X), False)):
     sys.stdout.write('\r%5.2f%% (%d)' % (100*it/len(X), len(roads)))
     sys.stdout.flush()
     dd = roads_distance(X[i])
-    if len(dd) == 0 or dd.min() > Dnn:
+    if len(dd) == 0 or dd.min() > Dclose:
         # create new road
         road = create_road(i)
-        roads.append(road)
+        if road:
+            roads.append(road)
 sys.stdout.write('\r                     \r')
 print('roads len: %d' % len(roads))
 
