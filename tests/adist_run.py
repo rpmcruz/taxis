@@ -2,17 +2,21 @@ import pandas as pd
 import numpy as np
 import sys
 
-usecols = ['starting_latitude', 'starting_longitude']
-df = pd.read_csv('../data/data_train_competition.csv', usecols=usecols)
-X = df.as_matrix()
-
 N = 100  # calculate adist for N closest points
 NN = 10000  # operative diameter (for memory sake)
+USE_SUBSET = True
+
+if USE_SUBSET:
+    X = np.loadtxt('../data/subset_train.csv', delimiter=',')
+else:
+    usecols = ['starting_latitude', 'starting_longitude']
+    df = pd.read_csv('../data/data_train_competition.csv', usecols=usecols)
+    X = df.as_matrix()
 
 f = open('adist.csv', 'w')
 
 for i in range(len(X)):
-    sys.stdout.write('\r%.4f%%' % (100*i/len(X)))
+    sys.stdout.write('\r%.2f%%' % (100*i/len(X)))
     sys.stdout.flush()
 
     # due to memory constrains, define operative diameter
